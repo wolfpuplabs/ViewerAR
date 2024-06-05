@@ -22,3 +22,13 @@ document.getElementById('share').addEventListener('click', function() {
         alert('Web Share API is not supported in your browser.');
     }
 });
+
+// Generate shareable link and QR code
+const shareLink = document.getElementById('share-link');
+shareLink.href = window.location.href;
+
+const qr = new QRious({
+    element: document.getElementById('qr-code'),
+    value: window.location.href,
+    size: 150
+});
