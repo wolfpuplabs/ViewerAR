@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAR Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WebAR Viewer</h1>
+        </header>
+        <main>
+            <model-viewer id="model" src="" alt="A 3D model" ar ar-modes="scene-viewer webxr quick-look" camera-controls auto-rotate></model-viewer>
+            <div class="upload-container">
+                <label for="upload">Upload 3D Model:</label>
+                <input type="file" id="upload" accept=".glb, .gltf" />
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
