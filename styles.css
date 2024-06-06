@@ -30,8 +30,7 @@ model-viewer {
     margin-bottom: 20px;
 }
 
-.upload-container,
-.share-container {
+.upload-container {
     margin-top: 10px;
 }
 
@@ -39,38 +38,4 @@ input[type="file"] {
     display: inline-block;
     padding: 10px;
     font-size: 16px;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 10px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-#share-link {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #28a745;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    margin-right: 10px;
-}
-
-#share-link:hover {
-    background-color: #218838;
-}
-
-#qr-code {
-    margin-top: 10px;
 }
