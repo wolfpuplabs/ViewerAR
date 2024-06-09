@@ -13,16 +13,13 @@
             <h1>WebAR Viewer</h1>
         </header>
         <main>
-            <model-viewer src="" ios-src="" ar ar-modes="scene-viewer webxr quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" autoplay>
-      <div class="progress-bar hide" slot="progress-bar">
-          <div class="update-bar"></div>
+            <model-viewer id="model" src="" alt="A 3D model" ar ar-modes="scene-viewer webxr quick-look" camera-controls auto-rotate></model-viewer>
             <div class="upload-container">
                 <label for="upload">Upload 3D Model:</label>
-                <input type="file" id="upload" accept=".glb, .usdz" />
+                <input type="file" id="upload" accept=".glb, .gltf" />
             </div>
         </main>
     </div>
     <script src="script.js"></script>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-  </body>
+</body>
 </html>
