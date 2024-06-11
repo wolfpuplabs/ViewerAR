@@ -6,7 +6,7 @@ let glbUrl = null;
 let usdzUrl = null;
 
 glbUpload.addEventListener('change', function(event) {
-  const file = event.target.files[0];
+  var file = event.target.files[0];
   if (file && file.name.endsWith('.glb')) {
     glbUrl = URL.createObjectURL(file);
     modelViewer.setAttribute('src', glbUrl);
@@ -16,7 +16,7 @@ glbUpload.addEventListener('change', function(event) {
 });
 
 usdzUpload.addEventListener('change', function(event) {
-  const file = event.target.files[0];
+  var file = event.target.files[0];
   if (file && file.name.endsWith('.usdz')) {
     usdzUrl = URL.createObjectURL(file);
     modelViewer.setAttribute('ios-src', usdzUrl);
