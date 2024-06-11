@@ -10,6 +10,8 @@ body {
 
 .container {
     text-align: center;
+    width: 80%;
+    max-width: 800px;
 }
 
 h1 {
@@ -30,10 +32,12 @@ model-viewer {
     margin: 20px 0;
     border: 1px solid #ddd;
     border-radius: 8px;
+    background-color: #f0f0f0;
 }
 
 #instructions {
     color: #666;
     margin-top: 10px;
 }
+
 
