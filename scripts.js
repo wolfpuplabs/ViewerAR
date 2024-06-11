@@ -28,7 +28,6 @@ usdzUpload.addEventListener('change', function(event) {
 function updateModelViewer() {
   if (glbUrl) {
     modelViewer.src = glbUrl;
-    modelViewer.iosSrc = usdzUrl || ''; 
   } else if (usdzUrl) {
     modelViewer.iosSrc = usdzUrl; 
   }
