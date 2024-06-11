@@ -30,7 +30,6 @@ function updateModelViewer() {
     modelViewer.src = glbUrl;
     modelViewer.iosSrc = usdzUrl || ''; 
   } else if (usdzUrl) {
-    modelViewer.src = '';
     modelViewer.iosSrc = usdzUrl; 
   }
 }
