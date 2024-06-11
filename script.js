@@ -1,18 +1,17 @@
-document.getElementById('upload').addEventListener('change', function(event) {
+document.getElementById('fileInput').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (file) {
         const url = URL.createObjectURL(file);
-        const modelViewer = document.getElementById('model');
+        const modelViewer = document.getElementById('modelViewer');
         modelViewer.src = url;
+
+        // Add alt text based on file name (optional enhancement)
+        modelViewer.alt = `3D model: ${file.name}`;
+        
+        // Clear the previous object URL to free up memory
+        modelViewer.addEventListener('load', () => {
+            URL.revokeObjectURL(url);
+        });
     }
 });
 
-// Load the model from the URL if present
-window.addEventListener('load', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const modelUrl = urlParams.get('model');
-    if (modelUrl) {
-        const modelViewer = document.getElementById('model');
-        modelViewer.src = modelUrl;
-    }
-});
