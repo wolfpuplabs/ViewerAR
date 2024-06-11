@@ -1,31 +1,29 @@
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" tone-mapping="neutral" shadow-intensity="1" ar camera-controls touch-action="pan-y" alt="A 3D model carousel">
-  
-  <button slot="ar-button" id="ar-button">
-    View in your space
-  </button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAR Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WebAR Viewer</h1>
+        </header>
+        <main>
+            <model-viewer id="model" src="" alt="A 3D model" ar ar-modes="scene-viewer webxr quick-look" camera-controls auto-rotate></model-viewer>
+            <div class="upload-container">
+                <label for="upload">Upload 3D Model:</label>
+                <input type="file" id="upload" accept=".glb, .gltf" />
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
 
-  <div id="ar-prompt">
-    <img src="../../assets/hand.png">
-  </div>
-
-  <button id="ar-failure">
-    AR is not tracking!
-  </button>
-
-  <div class="slider">
-    <div class="slides">
-      <button class="slide selected" onclick="switchSrc(this, 'Chair')" style="background-image: url('../../assets/ShopifyModels/Chair.webp');">
-
-      </button><button class="slide" onclick="switchSrc(this, 'Mixer')" style="background-image: url('../../assets/ShopifyModels/Mixer.webp');">
-
-      </button><button class="slide" onclick="switchSrc(this, 'GeoPlanter')" style="background-image: url('../../assets/ShopifyModels/GeoPlanter.webp');">
-      
-      </button><button class="slide" onclick="switchSrc(this, 'ToyTrain')" style="background-image: url('../../assets/ShopifyModels/ToyTrain.webp');">
-      
-      </button><button class="slide" onclick="switchSrc(this, 'Canoe')" style="background-image: url('../../assets/ShopifyModels/Canoe.webp');">    
-    </button></div>
-  </div>
-</model-viewer>
 
 
 
