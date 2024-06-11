@@ -3,20 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Asset Uploader with AR</title>
+    <title>WebAR Viewer</title>
     <link rel="stylesheet" href="styles.css">
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>3D Asset Uploader with AR</h1>
-        <input type="file" id="fileInput" accept=".glb,.usdz" />
-        <model-viewer id="modelViewer" src="" alt="3D model" ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate autoplay></model-viewer>
-        <p id="instructions">Upload a .glb or .usdz file to see it in 3D and AR.</p>
+        <header>
+            <img src="logo.png" alt="Logo" class="logo">
+            <h1>WebAR Viewer</h1>
+        </header>
+        <main>
+            <model-viewer id="model" src="" alt="A 3D model" ar ar-modes="scene-viewer webxr quick-look" camera-controls auto-rotate autoplay></model-viewer>
+            <div class="upload-container">
+                <label for="upload">Upload 3D Model:</label>
+                <input type="file" id="upload" accept=".glb, .gltf" />
+            </div>
+        </main>
     </div>
-    <script src="scripts.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
