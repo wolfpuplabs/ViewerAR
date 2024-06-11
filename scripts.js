@@ -29,6 +29,6 @@ function updateModelViewer() {
   if (glbUrl) {
     modelViewer.src = glbUrl;
   } else if (usdzUrl) {
-    modelViewer.iosSrc = usdzUrl; 
+    modelViewer.setAttribute('ios-src', usdzUrl);
   }
 }
