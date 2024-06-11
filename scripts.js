@@ -26,8 +26,11 @@ usdzUpload.addEventListener('change', function(event) {
 });
 
 function updateModelViewer() {
-  if (glbUrl && usdzUrl) {
+  if (glbUrl) {
     modelViewer.src = glbUrl;
-    modelViewer.iosSrc = usdzUrl;
+    modelViewer.iosSrc = usdzUrl || ''; 
+  } else if (usdzUrl) {
+    modelViewer.src = '';
+    modelViewer.iosSrc = usdzUrl; 
   }
 }
