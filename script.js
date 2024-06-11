@@ -1,17 +1,17 @@
-<script type="module">
-  const modelViewer = document.querySelector("model-viewer");
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const url = URL.createObjectURL(file);
+        const modelViewer = document.getElementById('modelViewer');
+        modelViewer.src = url;
 
-  window.switchSrc = (element, name) => {
-    const base = "../../assets/ShopifyModels/" + name;
-    modelViewer.src = base + '.glb';
-    modelViewer.poster = base + '.webp';
-    const slides = document.querySelectorAll(".slide");
-    slides.forEach((element) => {element.classList.remove("selected");});
-    element.classList.add("selected");
-  };
+        // Set alt text based on file name (optional enhancement)
+        modelViewer.alt = `3D model: ${file.name}`;
 
-  document.querySelector(".slider").addEventListener('beforexrselect', (ev) => {
-    // Keep slider interactions from affecting the XR scene.
-    ev.preventDefault();
-  });
-</script>
+        // Add a load event listener to revoke the object URL after loading the model
+        modelViewer.addEventListener('load', () => {
+            URL.revokeObjectURL(url);
+        });
+    }
+});
+
