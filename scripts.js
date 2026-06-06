@@ -8,6 +8,12 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const BUCKET = 'ar-models';
 const TABLE = 'shared_models';
 
+// --- Converter service config ---
+// URL of the GLB->USDZ converter microservice (see /converter folder).
+// Example: 'https://arable-converter.onrender.com'
+// Leave empty ('') to disable auto-convert and use manual USDZ upload only.
+const CONVERTER_URL = '';
+
 // supabase-js UMD exposes a global `supabase`; create the client.
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -40,6 +46,25 @@ function randomId(len = 10) {
   return out;
 }
 
+// Send a GLB to the converter service and get back a USDZ File.
+async function convertGlbToUsdz(file) {
+  if (!CONVERTER_URL) return null;
+  const form = new FormData();
+  form.append('model', file, file.name);
+  const resp = await fetch(`${CONVERTER_URL.replace(/\/$/, '')}/convert`, {
+    method: 'POST',
+    body: form,
+  });
+  if (!resp.ok) {
+    let detail = resp.statusText;
+    try { detail = (await resp.json()).detail || detail; } catch {}
+    throw new Error(detail);
+  }
+  const blob = await resp.blob();
+  const usdzName = file.name.replace(/\.(glb|gltf)$/i, '.usdz');
+  return new File([blob], usdzName, { type: 'model/vnd.usdz+zip' });
+}
+
 // Upload one file to Supabase Storage and return its public URL.
 async function uploadToStorage(file, ext) {
   const path = `${randomId(8)}-${Date.now()}.${ext}`;
@@ -55,14 +80,31 @@ async function uploadToStorage(file, ext) {
 }
 
 // --- File selection: keep a local preview + remember the file ---
-glbUpload.addEventListener('change', function (event) {
+glbUpload.addEventListener('change', async function (event) {
   const file = event.target.files[0];
-  if (file && file.name.toLowerCase().endsWith('.glb')) {
-    glbFile = file;
-    modelViewer.setAttribute('src', URL.createObjectURL(file));
-    setStatus('GLB siap. Klik "Generate Share Link" untuk membagikan.');
-  } else {
+  if (!file || !file.name.toLowerCase().endsWith('.glb')) {
     alert('Please upload a .glb file.');
+    return;
+  }
+  glbFile = file;
+  modelViewer.setAttribute('src', URL.createObjectURL(file));
+
+  // Auto-convert GLB -> USDZ (preserves animation) so iOS Quick Look works.
+  if (CONVERTER_URL) {
+    setStatus('Mengonversi GLB ke USDZ (termasuk animasi)...');
+    try {
+      const usdz = await convertGlbToUsdz(file);
+      if (usdz) {
+        usdzFile = usdz;
+        modelViewer.setAttribute('ios-src', URL.createObjectURL(usdz));
+        setStatus('GLB + USDZ siap. Klik "Generate Share Link" untuk membagikan.');
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus('Konversi USDZ gagal: ' + (err.message || err) + ' — kamu masih bisa upload USDZ manual.', true);
+    }
+  } else {
+    setStatus('GLB siap. Klik "Generate Share Link" untuk membagikan.');
   }
 });
 
