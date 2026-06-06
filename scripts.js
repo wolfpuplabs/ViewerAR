@@ -1,15 +1,17 @@
 /* ============================================================
    WebAR Viewer — single GLB uploader
-   Upload GLB -> converter service (convert + upload + share row) -> link
+   - Always shares the GLB (browser -> Supabase).
+   - If CONVERTER_URL is set, also makes an animated USDZ (server-side).
    ============================================================ */
 
-// --- Supabase (browser uses it only to READ shared models) ---
+// --- Supabase ---
 const SUPABASE_URL = 'https://ogmtrdzimqlxhzomnnzl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nbXRyZHppbXFseGh6b21ubnpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3MjI4ODgsImV4cCI6MjA5NjI5ODg4OH0.fXdfuU7iELLJC2ZJXrQMBq3YxZd2hRQc7Mi2TjZR7N8';
+const BUCKET = 'ar-models';
 const TABLE = 'shared_models';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- Converter service (does convert + upload + DB insert server-side) ---
+// --- Optional converter service (animated GLB -> USDZ). Leave '' to skip. ---
 // Example: 'https://arable-converter.onrender.com'
 const CONVERTER_URL = '';
 
@@ -26,7 +28,21 @@ function setStatus(msg, isError = false) {
   statusEl.style.color = isError ? '#c0392b' : '#555';
 }
 
-// --- Upload GLB -> auto convert + share ---
+// Upload a file (browser-side) to Supabase Storage; return its public URL.
+async function uploadToStorage(file, ext, contentType) {
+  const objPath = `${crypto.randomUUID()}.${ext}`;
+  const { error } = await db.storage
+    .from(BUCKET)
+    .upload(objPath, file, { contentType, upsert: false });
+  if (error) throw error;
+  return db.storage.from(BUCKET).getPublicUrl(objPath).data.publicUrl;
+}
+
+function buildLink(id) {
+  return `${location.origin}${location.pathname}?share=${id}`;
+}
+
+// --- Upload GLB -> auto share (+ USDZ if converter available) ---
 glbUpload.addEventListener('change', async function (event) {
   const file = event.target.files[0];
   if (!file || !/\.(glb|gltf)$/i.test(file.name)) {
@@ -34,44 +50,46 @@ glbUpload.addEventListener('change', async function (event) {
     return;
   }
 
-  // Instant local preview.
   modelViewer.setAttribute('src', URL.createObjectURL(file));
   modelViewer.removeAttribute('ios-src');
   shareResult.hidden = true;
-
-  if (!CONVERTER_URL) {
-    setStatus('CONVERTER_URL belum diisi di scripts.js — tidak bisa convert/share.', true);
-    return;
-  }
-
   glbUpload.disabled = true;
-  setStatus('Mengonversi & mengunggah... animasi dipertahankan, mohon tunggu.');
 
   try {
-    const form = new FormData();
-    form.append('model', file, file.name);
-    const resp = await fetch(`${CONVERTER_URL.replace(/\/$/, '')}/convert`, {
-      method: 'POST',
-      body: form,
-    });
-    if (!resp.ok) {
-      let detail = resp.statusText;
-      try { detail = (await resp.json()).detail || detail; } catch {}
-      throw new Error(detail);
-    }
-
-    const data = await resp.json(); // { id, glbUrl, usdzUrl, animated }
-    if (data.usdzUrl) modelViewer.setAttribute('ios-src', data.usdzUrl);
-
-    const link = `${location.origin}${location.pathname}?share=${data.id}`;
-    shareLinkInput.value = link;
-    shareResult.hidden = false;
-
-    const animMsg = data.animated ? ' Animasi terdeteksi & dikonversi.' : '';
-    if (data.usdzUrl) {
-      setStatus(`Berhasil!${animMsg} Link siap dibagikan.`);
+    if (CONVERTER_URL) {
+      // --- With converter: server converts + uploads + inserts row ---
+      setStatus('Mengonversi & mengunggah... animasi dipertahankan, mohon tunggu.');
+      const form = new FormData();
+      form.append('model', file, file.name);
+      const resp = await fetch(`${CONVERTER_URL.replace(/\/$/, '')}/convert`, {
+        method: 'POST',
+        body: form,
+      });
+      if (!resp.ok) {
+        let detail = resp.statusText;
+        try { detail = (await resp.json()).detail || detail; } catch {}
+        throw new Error(detail);
+      }
+      const data = await resp.json(); // { id, glbUrl, usdzUrl, animated }
+      if (data.usdzUrl) modelViewer.setAttribute('ios-src', data.usdzUrl);
+      shareLinkInput.value = buildLink(data.id);
+      shareResult.hidden = false;
+      const animMsg = data.animated ? ' Animasi terdeteksi & dikonversi.' : '';
+      setStatus(
+        data.usdzUrl
+          ? `Berhasil!${animMsg} Link siap dibagikan.`
+          : `Berhasil (USDZ gagal, GLB saja).${animMsg} Link siap dibagikan.`
+      );
     } else {
-      setStatus(`Berhasil (USDZ gagal dibuat, hanya GLB).${animMsg} Link siap dibagikan.`);
+      // --- Fallback: upload GLB straight to Supabase (no USDZ) ---
+      setStatus('Mengunggah ke Supabase...');
+      const glbUrl = await uploadToStorage(file, 'glb', 'model/gltf-binary');
+      const id = crypto.randomUUID();
+      const { error } = await db.from(TABLE).insert({ id, glb_url: glbUrl, usdz_url: null });
+      if (error) throw error;
+      shareLinkInput.value = buildLink(id);
+      shareResult.hidden = false;
+      setStatus('Berhasil! Link siap dibagikan. (AR iOS/USDZ butuh converter aktif.)');
     }
   } catch (err) {
     console.error(err);
@@ -106,10 +124,8 @@ async function loadSharedModel() {
       .eq('id', id)
       .single();
     if (error) throw error;
-
     if (data.glb_url) modelViewer.setAttribute('src', data.glb_url);
     if (data.usdz_url) modelViewer.setAttribute('ios-src', data.usdz_url);
-
     document.querySelectorAll('.upload-container, .hint').forEach((el) => (el.style.display = 'none'));
     setStatus('Model dibagikan dimuat. Tekan ikon AR untuk melihat di ruangmu.');
   } catch (err) {
