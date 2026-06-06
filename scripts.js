@@ -101,7 +101,7 @@ shareBtn.addEventListener('click', async function () {
       usdzUrl = await uploadToStorage(usdzFile, 'usdz');
     }
 
-    const id = randomId(10);
+    const id = crypto.randomUUID();
     setStatus('Menyimpan metadata...');
     const { error } = await db
       .from(TABLE)
