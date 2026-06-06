@@ -1,37 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebAR Viewer</title>
-    <link rel="stylesheet" href="styles.css">
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <title>A-Rable AR Viewer</title>
+    
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: sans-serif; margin: 20px; text-align: center; }
+        model-viewer { width: 100%; height: 500px; background-color: #f0f0f0; border-radius: 8px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .btn-share { display: none; margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <img src="logo.png" alt="Logo" class="logo">
-            <h1>WebAR Viewer</h1>
-        </header>
-        <main>
-            <model-viewer id="model" alt="A 3D model" ar ar-modes="scene-viewer webxr quick-look" camera-controls auto-rotate autoplay></model-viewer>
-            <div class="upload-container">
-                <label for="glbUpload">Upload GLB Model:</label>
-                <input type="file" id="glbUpload" accept=".glb, .gltf"/>
-            </div>
-            <div class="upload-container">
-                <label for="usdzUpload">Upload USDZ Model:</label>
-                <input type="file" id="usdzUpload" accept=".usdz"/>
-            </div>
-        </main>
-    </div>
-    <script src="scripts.js"></script>
+
+<div class="container">
+    <h2>A-Rable AR Viewer</h2>
+    
+    <model-viewer id="viewer" src="" ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" alt="A 3D model"></model-viewer>
+    
+    <br>
+    <input type="file" id="file-input" accept=".glb">
+    <p id="status-text"></p>
+    
+    <button id="share-btn" class="btn-share" onclick="salinLink()">Salin Link Share</button>
+</div>
+
+<script>
+    // 1. ISI DENGAN KREDENSIAL SUPABASE KAMU
+    // Bisa diambil di Supabase: Project Settings -> API
+    const SUPABASE_URL = "URL_SUPABASE_KAMU";
+    const SUPABASE_ANON_KEY = "ANON_KEY_SUPABASE_KAMU";
+    
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    const fileInput = document.getElementById('file-input');
+    const viewer = document.getElementById('viewer');
+    const statusText = document.getElementById('status-text');
+    const shareBtn = document.getElementById('share-btn');
+    let generatedShareLink = "";
+
+    // === LOGIKA 1: MENERIMA LINK SHARE (Penerima / User B) ===
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const modelUrl = urlParams.get('model');
+
+        if (modelUrl) {
+            statusText.innerText = "Memuat model dari link...";
+            // Langsung masukkan URL file glb ke <model-viewer>
+            viewer.src = decodeURIComponent(modelUrl);
+            statusText.innerText = "Model berhasil dimuat!";
+            fileInput.style.display = "none"; // Sembunyikan input file untuk penerima biar rapi
+        }
+    });
+
+    // === LOGIKA 2: UPLOAD & GENERATE LINK (Pengirim / User A) ===
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Tampilkan lokal dulu ke viewer supaya cepat dilihat user A
+        viewer.src = URL.createObjectURL(file);
+        
+        statusText.innerText = "Sedang mengupload model ke cloud agar bisa di-share...";
+        
+        // Buat nama file unik agar tidak tabrakan antar user
+        const fileName = `${Date.now()}_${file.name}`;
+
+        // Proses Upload ke Supabase Bucket bernama 'models'
+        const { data, error } = await supabase.storage
+            .from('models')
+            .upload(fileName, file);
+
+        if (error) {
+            statusText.innerText = "Gagal upload: " + error.message;
+            console.error(error);
+            return;
+        }
+
+        // Ambil URL publik dari file yang barusan diupload
+        const { data: { publicUrl } } = supabase.storage
+            .from('models')
+            .getPublicUrl(fileName);
+
+        // Buat link share mengarah ke web vercel kamu sendiri bawa parameter ?model=...
+        generatedShareLink = `${window.location.origin}${window.location.pathname}?model=${encodeURIComponent(publicUrl)}`;
+        
+        statusText.innerText = "Model siap di-share!";
+        shareBtn.style.display = "inline-block"; // Munculkan tombol share
+    });
+
+    // Fungsi untuk copy link ke clipboard
+    function salinLink() {
+        navigator.clipboard.writeText(generatedShareLink);
+        alert("Link berhasil disalin! Tinggal kirim ke teman kamu.");
+    }
+</script>
+
 </body>
 </html>
-
-
-
-
-
-
-
