@@ -35,10 +35,11 @@ main {
 
 model-viewer {
     width: 100%;
-    height: 400px;
-    background-color: #eee;
-    margin-bottom: 20px;
+    height: 500px; /* Atau sesuaikan dengan kebutuhan Anda */
+    background-color: #eeeeee; /* Memberikan warna background agar terlihat */
+    display: block;
 }
+
 
 .upload-container {
     margin-top: 10px;
