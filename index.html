@@ -6,6 +6,7 @@
     <title>WebAR Viewer</title>
     <link rel="stylesheet" href="styles.css">
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <!-- Supabase JS client (UMD -> exposes global `supabase`) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -16,19 +17,24 @@
         </header>
         <main>
             <model-viewer id="model" alt="A 3D model" ar ar-modes="scene-viewer webxr quick-look" camera-controls auto-rotate autoplay></model-viewer>
-            
-            <div class="upload-section" id="uploadSection">
-                <div class="upload-container">
-                    <label for="glbUpload">Upload GLB Model (Wajib):</label>
-                    <input type="file" id="glbUpload" accept=".glb, .gltf"/>
+            <div class="upload-container">
+                <label for="glbUpload">Upload GLB Model:</label>
+                <input type="file" id="glbUpload" accept=".glb, .gltf"/>
+            </div>
+            <div class="upload-container">
+                <label for="usdzUpload">Upload USDZ Model:</label>
+                <input type="file" id="usdzUpload" accept=".usdz"/>
+            </div>
+​
+            <button id="shareBtn" class="share-btn">Generate Share Link</button>
+            <p id="status" class="status"></p>
+​
+            <div id="shareResult" class="share-result" hidden>
+                <label for="shareLink">Shareable link:</label>
+                <div class="share-row">
+                    <input type="text" id="shareLink" readonly />
+                    <button id="copyBtn" class="copy-btn">Copy</button>
                 </div>
-                <div class="upload-container">
-                    <label for="usdzUpload">Upload USDZ Model (Opsional, untuk iOS):</label>
-                    <input type="file" id="usdzUpload" accept=".usdz"/>
-                </div>
-                
-                <button id="shareBtn" style="margin-top: 15px; padding: 10px; cursor: pointer;">Generate Share Link</button>
-                <input type="text" id="shareLink" readonly style="display:none; width: 100%; margin-top: 10px; padding: 10px;" />
             </div>
         </main>
     </div>
